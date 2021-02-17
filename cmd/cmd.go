@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"flag"
@@ -12,7 +12,7 @@ import (
 )
 
 type CommandLine struct {
-	blockchain *blockchain.BlockChain
+	Blockchain *blockchain.BlockChain
 }
 
 func (cli *CommandLine) printUsage() {
@@ -22,19 +22,19 @@ func (cli *CommandLine) printUsage() {
 }
 
 func (cli *CommandLine) addBlock(data string) {
-	cli.blockchain.AddBlock(data)
+	cli.Blockchain.AddBlock(data)
 	fmt.Println("Added Block!")
 }
 
 func (cli *CommandLine) printchain() {
 
-	iter := cli.blockchain.Iterator()
+	iter := cli.Blockchain.Iterator()
 
 	for {
 		block := iter.Next()
-		fmt.Printf("%s\n", block.Data)
-		fmt.Printf("%x\n", block.Hash)
-		fmt.Printf("%x\n", block.PrevHash)
+		fmt.Printf("Prev. hash: %x\n", block.PrevHash)
+		fmt.Printf("Data: %s\n", block.Data)
+		fmt.Printf("Hash: %x\n", block.Hash)
 		fmt.Printf("-----------Validate block-----------\n")
 		pow := blc.NewProof(block)
 		fmt.Printf("PoW: %s\n", strconv.FormatBool(pow.Validate()))
@@ -46,7 +46,7 @@ func (cli *CommandLine) printchain() {
 	}
 }
 
-func (cli *CommandLine) run() {
+func (cli *CommandLine) Run() {
 	cli.validdateArgs()
 	addBlockCmd := flag.NewFlagSet("add", flag.ExitOnError)
 	printChainCmd := flag.NewFlagSet("print", flag.ExitOnError)
@@ -73,7 +73,7 @@ func (cli *CommandLine) run() {
 	}
 
 	if printChainCmd.Parsed() {
-		cli.printUsage()
+		cli.printchain()
 	}
 
 }
