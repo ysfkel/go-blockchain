@@ -1,0 +1,1 @@
+https://steemit.com/utopian-io/@tensor/building-a-blockchain-with-go---refactor-and-proof-of-work---part-2
