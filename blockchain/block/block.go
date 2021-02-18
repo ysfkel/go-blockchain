@@ -1,9 +1,10 @@
-package blockchain
+package block
 
 import (
 	"bytes"
 	"encoding/gob"
-	"log"
+
+	shared "github.com/ysfkel/go-blockchain/shared"
 )
 
 type BlockBytes []byte
@@ -21,7 +22,7 @@ func (b *Block) Serialize() []byte {
 
 	err := encoder.Encode(b)
 
-	HandleError(err)
+	shared.HandleError(err)
 
 	return res.Bytes()
 }
@@ -32,7 +33,7 @@ func (b *Block) SerializeToBlockBytes() BlockBytes {
 
 	err := encoder.Encode(b)
 
-	HandleError(err)
+	shared.HandleError(err)
 
 	return BlockBytes(res.Bytes())
 }
@@ -45,17 +46,11 @@ func (b BlockBytes) Deserialize() *Block {
 
 	err := decoder.Decode(&block)
 
-	HandleError(err)
+	shared.HandleError(err)
 
 	return &block
 }
 
 func (b BlockBytes) ToBytes() []byte {
 	return []byte(b)
-}
-
-func HandleError(err error) {
-	if err != nil {
-		log.Panic(err)
-	}
 }

@@ -1,32 +1,36 @@
 package blockchain
 
-const (
-	dbPath        = "./tmp/blocks"
-	latestHashKey = "lh"
-	genesis       = "Genesis"
+import (
+	"fmt"
+
+	"github.com/dgraph-io/badger"
+	blk "github.com/ysfkel/go-blockchain/blockchain/block"
+	"github.com/ysfkel/go-blockchain/blockchain/consensus"
+	"github.com/ysfkel/go-blockchain/blockchain/db"
+	"github.com/ysfkel/go-blockchain/shared"
 )
 
 type IBlockChain interface {
 	AddBlock(data string)
-	GetLastestBlock() *Block
+	GetLastestBlock() *blk.Block
 }
 
 type BlockChain struct {
-	LastHash []byte      // hash of the last block
-	Database IRepository //*badger.DB
+	LastHash []byte         // hash of the last block
+	Database db.IRepository //*badger.DB
 }
 
 type BlockchainIterator struct {
 	CurrentHash []byte
-	Database    IRepository
+	Database    db.IRepository
 }
 
-func createBlock(data string, prevHash []byte) *Block {
+func createBlock(data string, prevHash []byte) *blk.Block {
 	initialNonce := 0
-	block := &Block{[]byte{}, []byte(data), prevHash, initialNonce}
+	block := &blk.Block{[]byte{}, []byte(data), prevHash, initialNonce}
 
 	//create proof
-	pow := NewProof(block)
+	pow := consensus.NewProof(block)
 	//run proof of work
 	nonce, hash := pow.Run()
 
@@ -37,23 +41,35 @@ func createBlock(data string, prevHash []byte) *Block {
 
 func (chain *BlockChain) AddBlock(data string) {
 
-	latestHash, err := chain.Database.Get([]byte(latestHashKey))
+	latestHash, err := chain.Database.Get([]byte(shared.LatestHashKey))
 
-	HandleError(err)
+	shared.HandleError(err)
 
 	newBlock := createBlock(data, latestHash)
 
 	err = chain.Database.Update(newBlock)
 
-	HandleError(err)
+	shared.HandleError(err)
 }
 
-func Genesis() *Block {
-	return createBlock(genesis, []byte{})
+func Genesis() *blk.Block {
+	return createBlock(shared.Genesis, []byte{})
 }
+
 func InitBlockChain() *BlockChain {
 
-	repo, lastHash := initRepository()
+	repo := db.NewRepository()
+
+	lastHash, err := repo.Get([]byte(shared.LatestHashKey))
+
+	if err == badger.ErrKeyNotFound {
+		fmt.Println("No existing blockchain found")
+		fmt.Println("Generating genesis block")
+		genesis := Genesis()
+		err = repo.Update(genesis)
+		shared.HandleError(err)
+		lastHash = genesis.Hash
+	}
 
 	blockchain := BlockChain{
 		LastHash: lastHash,
@@ -70,15 +86,15 @@ func (chain *BlockChain) Iterator() *BlockchainIterator {
 }
 
 //iterates backwards from the newest to genesis
-func (iter *BlockchainIterator) Next() *Block {
+func (iter *BlockchainIterator) Next() *blk.Block {
 
-	var block *Block
+	var block *blk.Block
 
 	encodedBlock, err := iter.Database.Get(iter.CurrentHash)
 
-	HandleError(err)
+	shared.HandleError(err)
 
-	block = BlockBytes(encodedBlock).Deserialize()
+	block = blk.BlockBytes(encodedBlock).Deserialize()
 	// change iterator hash to previous hash
 	iter.CurrentHash = block.PrevHash
 

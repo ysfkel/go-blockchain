@@ -8,7 +8,8 @@ import (
 	"strconv"
 
 	"github.com/ysfkel/go-blockchain/blockchain"
-	blc "github.com/ysfkel/go-blockchain/blockchain"
+	"github.com/ysfkel/go-blockchain/blockchain/consensus"
+	"github.com/ysfkel/go-blockchain/shared"
 )
 
 type CommandLine struct {
@@ -36,7 +37,7 @@ func (cli *CommandLine) printchain() {
 		fmt.Printf("Data: %s\n", block.Data)
 		fmt.Printf("Hash: %x\n", block.Hash)
 		fmt.Printf("-----------Validate block-----------\n")
-		pow := blc.NewProof(block)
+		pow := consensus.NewProof(block)
 		fmt.Printf("PoW: %s\n", strconv.FormatBool(pow.Validate()))
 		fmt.Println()
 
@@ -55,10 +56,10 @@ func (cli *CommandLine) Run() {
 	switch os.Args[1] {
 	case "add":
 		err := addBlockCmd.Parse((os.Args[2:]))
-		blockchain.HandleError(err)
+		shared.HandleError(err)
 	case "print":
 		err := printChainCmd.Parse((os.Args[2:]))
-		blockchain.HandleError(err)
+		shared.HandleError(err)
 	default:
 		cli.printUsage()
 		runtime.Goexit()

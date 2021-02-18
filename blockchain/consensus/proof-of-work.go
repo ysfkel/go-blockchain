@@ -1,4 +1,4 @@
-package blockchain
+package consensus
 
 import (
 	"bytes"
@@ -8,6 +8,8 @@ import (
 	"log"
 	"math"
 	"math/big"
+
+	"github.com/ysfkel/go-blockchain/blockchain/block"
 )
 
 /*
@@ -30,7 +32,7 @@ The difficulty is a measure of how difficult it is to mine a Bitcoin block, or i
 const Difficulty uint = 14
 
 type ProofOfWork struct {
-	Block *Block
+	Block *block.Block
 	//a target hash is a numeric value that a hashed block header must be less than or equal to in order for a new block to be awarded to a miner.
 	Target *big.Int // represents the requirement described which is derived from the difficuly
 }
@@ -40,7 +42,7 @@ type ProofOfWork struct {
  And then produce a pointer to a proof of work
  - takes the block and pairs with the target
 */
-func NewProof(b *Block) *ProofOfWork {
+func NewProof(b *block.Block) *ProofOfWork {
 	target := big.NewInt(1)
 
 	/*
