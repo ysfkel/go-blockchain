@@ -16,8 +16,8 @@ type IBlockChain interface {
 }
 
 type BlockChain struct {
-	LastHash []byte         // hash of the last block
-	Database db.IRepository //*badger.DB
+	LastHash []byte // hash of the last block
+	Database db.IRepository
 }
 
 type BlockchainIterator struct {
