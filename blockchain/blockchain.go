@@ -61,7 +61,7 @@ func InitBlockChain(repo db.IRepository) *BlockChain {
 	lastHash, err := repo.Get([]byte(shared.LatestHashKey))
 
 	if err == badger.ErrKeyNotFound {
-		fmt.Println("No existing blockchain found")
+		fmt.Println("No existing block found")
 		fmt.Println("Generating genesis block")
 		genesis := Genesis()
 		err = repo.Update(genesis)
