@@ -56,9 +56,7 @@ func Genesis() *blk.Block {
 	return createBlock(shared.Genesis, []byte{})
 }
 
-func InitBlockChain() *BlockChain {
-
-	repo := db.NewRepository()
+func InitBlockChain(repo db.IRepository) *BlockChain {
 
 	lastHash, err := repo.Get([]byte(shared.LatestHashKey))
 
