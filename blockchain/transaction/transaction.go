@@ -2,7 +2,11 @@ package transaction
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/gob"
 	"fmt"
+
+	"github.com/ysfkel/go-blockchain/shared"
 )
 
 type Transaction struct {
@@ -25,7 +29,15 @@ type TxInput struct {
 func (tx *Transaction) SetID() {
 	var encoded bytes.Buffer
 	var hash [32]byte
-	//encode :=
+
+	encode := gob.NewEncoder(&encoded)
+
+	err := encode.Encode(tx)
+	shared.HandleError(err)
+
+	hash = sha256.Sum256(encoded.Bytes())
+
+	tx.ID = hash[:]
 }
 
 func CoinbaseTx(to, data string) *Transaction {
@@ -54,4 +66,23 @@ func CoinbaseTx(to, data string) *Transaction {
 
 	return &tx
 
+}
+
+func (tx *Transaction) IsCoinbase() bool {
+
+	return len(tx.Inputs) == 1 &&
+		len(tx.Inputs[0].ID) == 0 &&
+		tx.Inputs[0].Out == -1
+}
+
+//checks if the account (data) can unlock
+func (in *TxInput) CanUnlock(data string) bool {
+	return in.Sig == data
+}
+
+//checks if the account (data) owns the information
+//or owns the information in the output which is referenced
+//by the input
+func (out *TxOutput) CanBeUnlocked(data string) bool {
+	return out.PubKey == data
 }
