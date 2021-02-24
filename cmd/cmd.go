@@ -9,6 +9,7 @@ import (
 
 	"github.com/ysfkel/go-blockchain/blockchain"
 	"github.com/ysfkel/go-blockchain/blockchain/consensus"
+	tx "github.com/ysfkel/go-blockchain/blockchain/transaction"
 	"github.com/ysfkel/go-blockchain/shared"
 )
 
@@ -22,8 +23,8 @@ func (cli *CommandLine) printUsage() {
 	fmt.Println("print - Prints the blocks in the chain")
 }
 
-func (cli *CommandLine) addBlock(data string) {
-	cli.Blockchain.AddBlock(data)
+func (cli *CommandLine) addBlock(tx []*tx.Transaction) {
+	cli.Blockchain.AddBlock(tx)
 	fmt.Println("Added Block!")
 }
 
@@ -34,7 +35,6 @@ func (cli *CommandLine) printchain() {
 	for {
 		block := iter.Next()
 		fmt.Printf("Prev. hash: %x\n", block.PrevHash)
-		fmt.Printf("Data: %s\n", block.Data)
 		fmt.Printf("Hash: %x\n", block.Hash)
 		fmt.Printf("-----------Validate block-----------\n")
 		pow := consensus.NewProof(block)

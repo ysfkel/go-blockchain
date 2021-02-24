@@ -1,4 +1,4 @@
-A blockchain is a open and public database so we don not want to store 
+A blockchain is a open and public database so we do not want to store 
 any type of sensitive information in a blockchain 
 
 - no accounts 
@@ -27,3 +27,8 @@ In the Genesis block, we have the first transaction, this is called a coinbase t
 In this transacton, we have only one input and one output 
  This input refences an empty output 
  because there are no older outputs 
+ it stores a bunch of arbitrary data nad not a signature 
+ the cinbase also has a subsidy or a reward attache dto it 
+ this reward is released to a single account , when that account mines a block
+
+ This implementation uses a constant for coinbases for simplicity

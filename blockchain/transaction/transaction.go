@@ -43,7 +43,7 @@ func (tx *Transaction) SetID() {
 func CoinbaseTx(to, data string) *Transaction {
 
 	if data == "" {
-		data = fmt.Sprintf("cOINS TO %S", to)
+		data = fmt.Sprintf("Coins TO %s", to)
 	}
 
 	txin := TxInput{

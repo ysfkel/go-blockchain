@@ -7,6 +7,7 @@ import (
 	blk "github.com/ysfkel/go-blockchain/blockchain/block"
 	"github.com/ysfkel/go-blockchain/blockchain/consensus"
 	"github.com/ysfkel/go-blockchain/blockchain/db"
+	tx "github.com/ysfkel/go-blockchain/blockchain/transaction"
 	"github.com/ysfkel/go-blockchain/shared"
 )
 
@@ -25,9 +26,9 @@ type BlockchainIterator struct {
 	Database    db.IRepository
 }
 
-func createBlock(data string, prevHash []byte) *blk.Block {
+func createBlock(transactions []*tx.Transaction, prevHash []byte) *blk.Block {
 	initialNonce := 0
-	block := &blk.Block{[]byte{}, []byte(data), prevHash, initialNonce}
+	block := &blk.Block{[]byte{}, transactions, prevHash, initialNonce}
 
 	//create proof
 	pow := consensus.NewProof(block)
@@ -39,31 +40,31 @@ func createBlock(data string, prevHash []byte) *blk.Block {
 	return block
 }
 
-func (chain *BlockChain) AddBlock(data string) {
+func (chain *BlockChain) AddBlock(transactions []*tx.Transaction) {
 
 	latestHash, err := chain.Database.Get([]byte(shared.LatestHashKey))
 
 	shared.HandleError(err)
 
-	newBlock := createBlock(data, latestHash)
+	newBlock := createBlock(transactions, latestHash)
 
 	err = chain.Database.Update(newBlock)
 
 	shared.HandleError(err)
 }
 
-func Genesis() *blk.Block {
-	return createBlock(shared.Genesis, []byte{})
+func Genesis(coinbase *tx.Transaction) *blk.Block {
+	return createBlock([]*tx.Transaction{coinbase}, []byte{})
 }
 
-func InitBlockChain(repo db.IRepository) *BlockChain {
+func InitBlockChain(address string, repo db.IRepository) *BlockChain {
 
 	lastHash, err := repo.Get([]byte(shared.LatestHashKey))
 
 	if err == badger.ErrKeyNotFound {
 		fmt.Println("No existing block found")
 		fmt.Println("Generating genesis block")
-		genesis := Genesis()
+		genesis := Genesis(tx.CoinbaseTx("yusuf-address", "coinbase tx"))
 		err = repo.Update(genesis)
 		shared.HandleError(err)
 		lastHash = genesis.Hash
