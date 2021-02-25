@@ -48,7 +48,7 @@ func (cli *CommandLine) printchain() {
 }
 
 func (cli *CommandLine) Run() {
-	cli.validdateArgs()
+	cli.validateArgs()
 	addBlockCmd := flag.NewFlagSet("add", flag.ExitOnError)
 	printChainCmd := flag.NewFlagSet("print", flag.ExitOnError)
 	addBlockData := addBlockCmd.String("block", "", "Block data")
@@ -78,7 +78,7 @@ func (cli *CommandLine) Run() {
 	}
 
 }
-func (cli *CommandLine) validdateArgs() {
+func (cli *CommandLine) validateArgs() {
 	if len(os.Args) < 2 {
 		cli.printUsage()
 		// exits application by shutting down the go routine

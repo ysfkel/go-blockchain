@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/dgraph-io/badger"
 	blk "github.com/ysfkel/go-blockchain/blockchain/block"
@@ -53,22 +54,46 @@ func (chain *BlockChain) AddBlock(transactions []*tx.Transaction) {
 	shared.HandleError(err)
 }
 
-func Genesis(coinbase *tx.Transaction) *blk.Block {
+func createGenesis(coinbase *tx.Transaction) *blk.Block {
 	return createBlock([]*tx.Transaction{coinbase}, []byte{})
 }
 
 func InitBlockChain(address string, repo db.IRepository) *BlockChain {
+
+	if repo.DBExists() == false {
+		fmt.Println("Blockchain already exists")
+		runtime.Goexit()
+	}
 
 	lastHash, err := repo.Get([]byte(shared.LatestHashKey))
 
 	if err == badger.ErrKeyNotFound {
 		fmt.Println("No existing block found")
 		fmt.Println("Generating genesis block")
-		genesis := Genesis(tx.CoinbaseTx("yusuf-address", "coinbase tx"))
+		genesis := createGenesis(tx.CoinbaseTx("yusuf-address", "coinbase tx"))
 		err = repo.Update(genesis)
 		shared.HandleError(err)
 		lastHash = genesis.Hash
 	}
+
+	blockchain := BlockChain{
+		LastHash: lastHash,
+		Database: repo,
+	}
+
+	return &blockchain
+}
+
+func (chain *BlockChain) GetBlockChain(address string, repo db.IRepository) *BlockChain {
+
+	if repo.DBExists() == false {
+		fmt.Println("Blockchain already exists")
+		runtime.Goexit()
+	}
+
+	lastHash, err := repo.Get([]byte(shared.LatestHashKey))
+
+	shared.HandleError(err)
 
 	blockchain := BlockChain{
 		LastHash: lastHash,
